@@ -1,0 +1,121 @@
+<?php
+session_start();
+
+require_once __DIR__ . '/../BL/auth_service.php';
+
+$error_message = '';
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    // Server-side validation in Business Layer
+    $validationErrors = validateLogin($email, $password);
+
+    if (!empty($validationErrors)) {
+        // show first error message
+        $error_message = reset($validationErrors);
+    } else {
+        // Database config
+        $conn = new mysqli("192.168.100.10", "remote_user", "Aa123", "tasksdb", 3306);
+        if ($conn->connect_error) {
+            $error_message = "Database connection failed.";
+        } else {
+            // Prepared query
+            $stmt = $conn->prepare("SELECT user_id, first_name, password_hash FROM users WHERE email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $stmt->bind_result($uid, $first_name, $hash);
+
+            if ($stmt->fetch() && password_verify($password, $hash)) {
+                $_SESSION['user_id'] = $uid;
+                $_SESSION['first_name'] = $first_name ?: '';
+                $stmt->close();
+                $conn->close();
+                header("Location: view_data.php");
+                exit();
+            } else {
+                $error_message = "Invalid email or password.";
+            }
+            $stmt->close();
+            $conn->close();
+        }
+    }
+}
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login • Student Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar">
+    <div class="inner container">
+      <div class="brand"><span class="dot"></span> Student Task Tracker</div>
+      <div class="stack">
+        <a href="home.html">Home</a>
+        <a href="login.php" class="active">Login</a>
+        <a href="register.php">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card" style="max-width:520px; margin:0 auto;">
+      <h2>Login</h2>
+      <?php if ($error_message): ?>
+        <p class="small" style="color:#ffb3b3;"><?php echo htmlspecialchars($error_message); ?></p>
+      <?php endif; ?>
+      <form id="loginForm" action="login.php" method="post" novalidate>
+        <input class="input" id="login_email" type="email" name="email" placeholder="you@university.edu" required>
+        <input class="input" id="login_password" type="password" name="password" placeholder="Password" required minlength="6">
+        <div class="actions">
+          <button class="btn" type="submit">Log In</button>
+        </div>
+      </form>
+      <p class="small" id="loginError" style="color:#c81e1e; margin-top:8px; display:none;">
+        Please enter a valid email and password (at least 6 characters).
+      </p>
+      <p class="small">Don’t have an account? <a href="register.php">Register</a></p>
+    </div>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
+
+  const email = document.getElementById("login_email");
+  const password = document.getElementById("login_password");
+  const errorMsg = document.getElementById("loginError");
+
+  form.addEventListener("submit", function (e) {
+    let valid = true;
+    email.style.borderColor = "";
+    password.style.borderColor = "";
+
+    if (!email.value.includes("@")) {
+      email.style.borderColor = "#c81e1e";
+      valid = false;
+    }
+
+    if (password.value.length < 6) {
+      password.style.borderColor = "#c81e1e";
+      valid = false;
+    }
+
+    if (!valid) {
+      if (errorMsg) errorMsg.style.display = "block";
+      e.preventDefault();
+    } else {
+      if (errorMsg) errorMsg.style.display = "none";
+    }
+  });
+});
+</script>
+
+</body>
+</html>

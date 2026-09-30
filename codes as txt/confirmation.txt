@@ -1,0 +1,46 @@
+<?php
+session_start();
+require_once "db_conn.php";
+
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login.php");
+  exit();
+}
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirmation • Student Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar">
+    <div class="inner container">
+      <div class="brand"><span class="dot"></span> Student Task Tracker</div>
+      <div class="stack">
+        <a href="home.html">Home</a>
+        <a href="data_entry.php">New Task</a>
+        <a href="view_data.php">Tasks</a>
+        <a href="logout.php">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="hero">
+      <?php if (!empty($_SESSION['first_name'])): ?>
+        <h3><?php echo htmlspecialchars($_SESSION['first_name']); ?>, all set!</h3>
+      <?php endif; ?>
+      <h2>Action Completed</h2>
+      <p class="lead">Your request was processed successfully.</p>
+      <div class="actions center">
+        <a class="btn" href="view_data.php">View Tasks</a>
+        <a class="btn secondary" href="data_entry.php">Add Another</a>
+        <a class="btn ghost" href="home.html">Home</a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

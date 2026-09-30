@@ -1,0 +1,197 @@
+<?php
+session_start();
+require_once "db_conn.php";
+
+//  tasks لازم اليوزر يسجل دخول عشان يقدر يسجل  security check
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$current_user_id = $_SESSION['user_id'];
+
+$servername = "127.0.0.1";
+$username = "root";
+$password = "";
+$dbname = "tasksdb";
+$port = 3307;
+
+$conn = new mysqli($servername, $username, $password, $dbname, $port);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// يحذف تاسك
+if (isset($_GET['delete_id'])) {
+    $delete_id = intval($_GET['delete_id']);
+    
+    // يتأكد من ان المستخدم يملك التاسك قبل يحذفه
+    $stmt = $conn->prepare("DELETE FROM tasks WHERE task_id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $delete_id, $current_user_id);
+    $stmt->execute();
+    
+    if ($stmt->affected_rows > 0) {
+        header("Location: view_data.php?status=deleted");
+        exit();
+    }
+    $stmt->close();
+}
+// ويحدث حالةالتاسك بالداتابيس بعدcomplete اليوزر يقدر يضغط 
+if (isset($_GET['complete_id'])) {
+    $complete_id = intval($_GET['complete_id']);
+    
+
+    // يحدث خالة التاسك ويتأكد من ان المستخدم يملكه
+    $stmt = $conn->prepare("UPDATE tasks SET status = 'Completed' WHERE task_id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $complete_id, $current_user_id);
+    $stmt->execute();
+    
+    if ($stmt->affected_rows > 0) {
+        header("Location: view_data.php?status=completed");
+        exit();
+    }
+    $stmt->close();
+}
+
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['title'])) {
+    $title = trim($_POST['title']);
+    $course = trim($_POST['course']);
+    $priority = $_POST['priority'];
+    $due_date = $_POST['due_date'];
+    $description = trim($_POST['description']);
+    $status = 'Pending'; 
+
+    // db يضيف بال
+    $stmt = $conn->prepare("INSERT INTO tasks (user_id, title, course, priority, due_date, description, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssss", $current_user_id, $title, $course, $priority, $due_date, $description, $status);
+
+    if ($stmt->execute()) {
+        header("Location: confirmation.php?task=saved");
+        exit();
+    } else {
+        $error_message = "Error: " . $stmt->error;
+    }
+    
+    $stmt->close();
+}
+
+
+
+$tasks = [];
+$order_by = "due_date ASC";
+
+// Implement dynamic sorting (e.g., sort by 'priority', 'course', etc.)
+if (isset($_GET['sort'])) {
+    $sort_field = $_GET['sort'];
+    $sort_order = isset($_GET['order']) && strtoupper($_GET['order']) == 'DESC' ? 'DESC' : 'ASC';
+
+}
+
+$sql = "SELECT task_id, title, course, priority, due_date, description, status FROM tasks WHERE user_id = ? ORDER BY $order_by";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $current_user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $tasks[] = $row;
+}
+
+$stmt->close();
+$conn->close();
+
+
+?>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks • Student Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="navbar">
+  <div class="inner container">
+    <div class="brand"><span class="dot"></span> Student Task Tracker</div>
+    <div class="stack">
+      <a href="home.html">Home</a>
+      <a href="logout.php">Logout</a>
+      <a href="data_entry.php">New Task</a>
+      <a href="view_data.php" class="active">Tasks</a>
+    </div>
+  </div>
+</div>
+
+  <div class="container">
+    
+  <?php if (isset($_SESSION['first_name'])): ?>
+    <h3 style="text-align:center; color:var(--primary); margin-bottom:20px;">Hey there, <?php echo htmlspecialchars($_SESSION['first_name']); ?>!</h3>
+  <?php endif; ?>
+
+  <h2>Tasks</h2>
+  
+  <?php if (isset($_GET['status'])): ?>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <?php if ($_GET['status'] == 'deleted'): ?>
+            <p style="color: var(--danger);">Task deleted successfully.</p>
+        <?php elseif ($_GET['status'] == 'completed'): ?>
+            <p style="color: var(--success);">Task marked as complete.</p>
+        <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  
+  <?php if (empty($tasks)): ?>
+    <p style="text-align: center;">You have no tasks! <a href="data_entry.php">Add a new one</a>.</p>
+  <?php else: ?>
+  
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Course</th>
+        <th>Priority</th>
+        <th>Due Date</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($tasks as $task): 
+          // Determine the class for the status pill
+          $pill_class = '';
+          if ($task['status'] == 'Completed') {
+              $pill_class = 'success';
+          } elseif ($task['priority'] == 'High') {
+              $pill_class = 'danger';
+          } elseif ($task['priority'] == 'Medium') {
+              $pill_class = 'warn';
+          }
+      ?>
+        <tr>
+          <td>
+              <strong><?php echo htmlspecialchars($task['title']); ?></strong>
+              <?php if (!empty($task['description'])): ?>
+                <p class="small" style="color:var(--muted); margin-top:4px; max-width:300px;"><?php echo nl2br(htmlspecialchars($task['description'])); ?></p>
+              <?php endif; ?>
+          </td>
+          <td><?php echo htmlspecialchars($task['course']); ?></td>
+          <td><?php echo htmlspecialchars($task['priority']); ?></td>
+          <td><?php echo htmlspecialchars($task['due_date']); ?></td>
+          <td><span class="pill <?php echo $pill_class; ?>"><?php echo htmlspecialchars($task['status']); ?></span></td>
+          <td>
+            <a class="btn ghost" href="view_data.php?complete_id=<?php echo $task['task_id']; ?>">Complete</a>
+            <a class="btn ghost" style="color:var(--danger)" href="view_data.php?delete_id=<?php echo $task['task_id']; ?>" onclick="return confirm('Are you sure you want to delete this task?');">Delete</a>
+          </td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+  </div>
+  <?php endif; ?>
+  </div>
+</body>
+</html>

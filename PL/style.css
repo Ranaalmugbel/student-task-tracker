@@ -1,0 +1,108 @@
+:root{
+  --bg:#0f1226;
+  --surface:#151936;
+  --surface-2:#1c2147;
+  --text:#e9ecff;
+  --muted:#b9c0ff;
+  --primary:#7c8cfb;
+  --primary-600:#6678f6;
+  --accent:#75e3ff;
+  --success:#5dd39e;
+  --danger:#ff7a7a;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius: 16px;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #2030a8 0%, transparent 60%),
+    radial-gradient(1000px 700px at 110% 10%, #3d1f83 0%, transparent 60%),
+    linear-gradient(180deg, #0e1024, #0b0d1c 60%);
+  background-color:var(--bg);
+}
+
+/* Layout */
+.container{ max-width:1040px; margin:0 auto; padding:24px; }
+.stack{ display:flex; gap:16px; flex-wrap:wrap }
+.grow{ flex:1 1 320px }
+
+/* Top Nav */
+.navbar{
+  position:sticky; top:0; z-index:10;
+  background: rgba(17,21,49,.7);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.navbar .inner{ display:flex; align-items:center; gap:20px; padding:14px 24px; }
+.brand{ font-weight:700; letter-spacing:.3px; display:flex; align-items:center; gap:10px; }
+.brand .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px var(--accent) }
+.navbar a{ color:var(--muted); text-decoration:none; padding:8px 10px; border-radius:10px; }
+.navbar a.active, .navbar a:hover{ color:var(--text); background:rgba(124,140,251,.14) }
+
+/* Hero / Header */
+.hero{ padding:40px 24px 10px; text-align:center; }
+h1{ margin:10px 0 6px; font-size:clamp(26px, 4vw, 40px); }
+.lead{ color:var(--muted); margin:0 auto 24px; max-width:720px }
+
+/* Cards */
+.card{
+  background: linear-gradient(180deg, rgba(124,140,251,.06), rgba(10,12,28,.6));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding:22px;
+  box-shadow: var(--shadow);
+}
+.card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
+.card-title{ font-weight:700 }
+.card-sub{ color:var(--muted); font-size:14px }
+
+/* Forms */
+form{ display:grid; gap:14px }
+.label{ font-size:14px; color:var(--muted); margin-bottom:6px }
+.input, select, textarea{
+  width:100%; padding:12px 14px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0f1330; color:var(--text);
+  transition:.2s border, .2s box-shadow;
+}
+.input:focus, select:focus, textarea:focus{
+  border-color:var(--primary); box-shadow:0 0 0 3px rgba(124,140,251,.25)
+}
+textarea{ min-height:120px; resize:vertical }
+.row-2{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+@media (max-width:700px){ .row-2{ grid-template-columns:1fr } }
+
+.actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:6px }
+.actions.center{ justify-content:center }
+.btn{
+  padding:10px 14px; border:0; border-radius:12px; cursor:pointer;
+  background:var(--primary); color:#0b0d1c; font-weight:700;
+  transition:.2s transform, .2s opacity, .2s background;
+}
+.btn:hover{ transform:translateY(-1px) }
+.btn.secondary{ background:#222644; color:var(--text) }
+.btn.ghost{ background:transparent; color:var(--muted); border:1px dashed rgba(255,255,255,.2) }
+
+/* Tables */
+.table-wrap{ overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.08) }
+table{ width:100%; border-collapse:collapse; background:#0f1330 }
+th, td{ padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.06) }
+th{ background:#15193a; text-align:left; color:#cdd3ff }
+tr:hover td{ background:rgba(124,140,251,.06) }
+
+/* Status Pills */
+.pill{ padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.2px }
+.pill.success{ background:rgba(93,211,158,.18); color:#9df2cd; border:1px solid rgba(93,211,158,.3) }
+.pill.pending{ background:rgba(255,200,124,.18); color:#ffe6bf; border:1px solid rgba(255,200,124,.3) }
+.pill.danger{ background:rgba(255,122,122,.18); color:#ffc9c9; border:1px solid rgba(255,122,122,.3) }
+.pill.dd{ background:rgba(255,122,122,.18); color:#0c92a3; border:1px solid rgba(19, 68, 138, 0.3) }
+
+
+/* Footer */
+.footer{ color:var(--muted); text-align:center; padding:24px; opacity:.8 }
+
+.small{ font-size:12px; color:var(--muted) }

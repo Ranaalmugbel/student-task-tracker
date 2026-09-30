@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home • Student Task Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="navbar">
+    <div class="inner container">
+      <div class="brand"><span class="dot"></span> Student Task Tracker</div>
+      <div class="stack">
+        <a href="home.html" class="active">Home</a>
+        <a href="login.php">Login</a>
+        <a href="register.php">Register</a>
+        <a href="data_entry.php">New Task</a>
+        <a href="view_data.php">Tasks</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="hero">
+      <h1>Stay on top of your semester.</h1>
+      <p class="lead">Create tasks, track deadlines, and visualize progress all in a clean, distraction-free interface.</p>
+      <div class="actions center">
+        <a class="btn" href="register.php">Get Started</a>
+        <a class="btn secondary" href="view_data.php">View Tasks</a>
+      </div>
+    </section>
+
+    <div class="stack">
+      <div class="card grow">
+        <div class="card-header">
+          <div class="card-title">Fast Input</div>
+          <div class="card-sub">Add a task in seconds</div>
+        </div>
+        <p class="small">Use the New Task form to capture assignment name, course, priority, and due date.</p>
+      </div>
+      <div class="card grow">
+        <div class="card-header">
+          <div class="card-title">Smart Overview</div>
+          <div class="card-sub">See what’s due next</div>
+        </div>
+        <p class="small">The Tasks page lists your upcoming work with status pills and sorting-friendly layout.</p>
+      </div>
+      <div class="card grow">
+        <div class="card-header">
+          <div class="card-title">Clean UX</div>
+          <div class="card-sub">Consistent navigation</div>
+        </div>
+        <p class="small">Sticky nav, clear confirmations, and accessible components keep you focused.</p>
+      </div>
+    </div>
+
+    <div class="footer small">Home IT331 • Phase 1</div>
+  </div>
+</body>
+</html>
